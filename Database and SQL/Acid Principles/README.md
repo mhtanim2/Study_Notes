@@ -1,5 +1,42 @@
 # 1. ACID Principles
 
+## Table of Contents
+- [1. ACID Principles](#1-acid-principles)
+  - [Table of Contents](#table-of-contents)
+  - [Summary](#summary)
+  - [1.1. Transaction](#11-transaction)
+    - [What](#what)
+    - [Why](#why)
+    - [How](#how)
+      - [Commit Example](#commit-example)
+      - [Rollback Example](#rollback-example)
+    - [Account Balances](#account-balances)
+- [2. ACID Principles Explained](#2-acid-principles-explained)
+  - [2.1. Atomicity](#21-atomicity)
+    - [What](#what-1)
+    - [Why](#why-1)
+    - [How](#how-1)
+  - [2.2. Consistency](#22-consistency)
+    - [What](#what-2)
+    - [Why](#why-2)
+    - [How](#how-2)
+  - [2.3. Isolation](#23-isolation)
+    - [What](#what-3)
+    - [Why](#why-3)
+    - [How](#how-3)
+  - [2.4. Durability](#24-durability)
+    - [What](#what-4)
+    - [Why](#why-4)
+    - [How](#how-4)
+
+---
+
+## Summary
+
+This document explains the ACID principles in database systems, focusing on how transactions work and why ACID properties are essential for data integrity and reliability. Each principle (Atomicity, Consistency, Isolation, Durability) is described with its definition, importance, and practical SQL examples.
+
+---
+
 ## 1.1. Transaction
 
 ### What
@@ -81,10 +118,6 @@ ACID stands for Atomicity, Consistency, Isolation, and Durability. These are the
 
 ### Why
 - Prevents partial updates to the database, which could lead to data corruption or inconsistency.
-- After we restarted the machine the first account has been debited but the other account has not been credited.
-- This is really bad as we just lost data, and the information is inconsistent
-- An atomic transaction is a transaction that will rollback all queries if one or more queries failed.
-- The database should clean this up after restart.
 
 ### How
 
@@ -189,5 +222,7 @@ COMMIT TRANSACTION;
 | After Update         | 800              |
 | After Commit         | 800              |
 | After Crash/Restart  | 800              |
+
+---
 
 
