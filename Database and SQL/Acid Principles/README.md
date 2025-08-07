@@ -24,6 +24,10 @@
     - [What](#what-3)
     - [Why](#why-3)
     - [How](#how-3)
+      - [1. Dirty Read](#1-dirty-read)
+      - [2. Non-Repeatable Read](#2-non-repeatable-read)
+      - [3. Phantom Read](#3-phantom-read)
+      - [4. Lost Update](#4-lost-update)
   - [2.4. Durability](#24-durability)
     - [What](#what-4)
     - [Why](#why-4)
@@ -114,11 +118,14 @@ ACID stands for Atomicity, Consistency, Isolation, and Durability. These are the
 ## 2.1. Atomicity
 
 ### What
-- Atomicity ensures that a transaction is treated as a single, indivisible unit. Either all operations succeed, or none do.
+- Atomicity ensures that all the <ins>query is treated as a single</ins>, <b>indivisible unit</b>. Either all operations succeed, or none do.
 
 ### Why
 - Prevents partial updates to the database, which could lead to data corruption or inconsistency.
-
+- After we restarted the machine the first account has been debited but the other account has not been credited.
+- This is really bad as we just lost data, and the information is inconsistent
+- An atomic transaction is a transaction that will rollback all queries if one or more queries failed.
+- The database should clean this up after restart
 ### How
 
 ```sql
@@ -153,6 +160,16 @@ COMMIT TRANSACTION;
 - Guarantees that only valid data is written to the database, preserving data integrity.
 
 ### How
+There are `2 type` of consistency.
+- #### 2.2.1. Data Consistency
+  ![Isolation Levels](./resource/ConsistencyInData.png)
+  Consistent Data Example: 
+  ![Isolation Levels](./resource/ConsistentDataExample.png)
+  Inconsistent Data Example: 
+  ![Isolation Levels](./resource/InConsistentDataExample.png)
+
+
+- #### 2.2.2. Read Consistency
 
 ```sql
 -- Assume a constraint: Balance >= 0
@@ -174,28 +191,126 @@ COMMIT TRANSACTION;
 ## 2.3. Isolation
 
 ### What
-- Isolation ensures that concurrent transactions do not interfere with each other. Each transaction is executed as if it were the only one in the system.
+- Isolation ensures that **concurrent transactions** do not interfere with each other. Each transaction is executed as if it were the only one in the system.
 
 ### Why
-- Prevents issues like dirty reads, non-repeatable reads, and phantom reads.
+- Prevents issues like **dirty reads**, **non-repeatable reads**, **phantom reads**, and **lost updates**.
 
 ### How
+> #### READ PHENOMENA
+
+#### 1. Dirty Read
+A transaction reads data written by another uncommitted transaction.
 
 ```sql
 -- Transaction 1
 BEGIN TRANSACTION;
 UPDATE Accounts SET Balance = Balance - 100 WHERE AccountID = 1;
 
--- Transaction 2 (runs concurrently)
+-- Transaction 2 (before T1 commits)
 BEGIN TRANSACTION;
-SELECT Balance FROM Accounts WHERE AccountID = 1; -- Should not see uncommitted changes from Transaction 1
+SELECT Balance FROM Accounts WHERE AccountID = 1; -- Sees uncommitted change
 ```
 
-| Time         | Transaction 1 (T1)         | Transaction 2 (T2)         | Observed Balance |
-|--------------|----------------------------|----------------------------|------------------|
-| Start        | Reads 1000                 | Reads 1000                 | 1000             |
-| T1 Updates   | Sets to 900 (uncommitted)  | Reads 1000 (should not see T1's change) | 1000             |
-| T1 Commits   | 900                        |                            |                  |
+| Step              | T1 (Account 1) | T2 Reads | Committed? |
+|-------------------|----------------|----------|------------|
+| Before T1 Update  | 1000           | 1000     | No         |
+| After T1 Update   | 900            | 900      | No         |
+| After T1 Rollback | 1000           | 900      | No         |
+
+**Summary**: _Updated_ the result for Transaction T2 read, Even though the T1 RollBack, worst among all.
+
+---
+
+#### 2. Non-Repeatable Read
+A transaction reads the same row twice and gets different values because another transaction modified and committed between the reads.
+
+```sql
+-- Transaction 1
+BEGIN TRANSACTION;
+SELECT Balance FROM Accounts WHERE AccountID = 1; -- Reads 1000
+
+-- Transaction 2
+BEGIN TRANSACTION;
+UPDATE Accounts SET Balance = Balance - 100 WHERE AccountID = 1;
+COMMIT TRANSACTION;
+
+-- Transaction 1 (again)
+SELECT Balance FROM Accounts WHERE AccountID = 1; -- Reads 900
+```
+
+| Step                | T1 Reads | T2 Updates | T1 Reads Again |
+|---------------------|----------|------------|----------------|
+| Initial             | 1000     |            |                |
+| After T2 Update     |          | 900        |                |
+| T1 Second Read      |          |            | 900            |
+
+**Summary**: _Updated_ the result for second T1 read, due to T2 commit.
+
+---
+
+#### 3. Phantom Read
+A transaction re-executes a query returning a set of rows that satisfy a condition and finds that the set of rows has changed due to another recently-committed transaction.
+
+```sql
+-- Transaction 1
+BEGIN TRANSACTION;
+SELECT * FROM Orders WHERE Amount > 500; -- Returns 2 rows
+
+-- Transaction 2
+BEGIN TRANSACTION;
+INSERT INTO Orders (OrderID, Amount) VALUES (3, 700);
+COMMIT TRANSACTION;
+
+-- Transaction 1 (again)
+SELECT * FROM Orders WHERE Amount > 500; -- Returns 3 rows (phantom row appears)
+```
+
+| Step                | Orders Table (Amount > 500) |
+|---------------------|----------------------------|
+| T1 First Read       | Order 1, Order 2           |
+| After T2 Insert     | Order 1, Order 2, Order 3  |
+| T1 Second Read      | Order 1, Order 2, Order 3  |
+
+**Summary**: _Order 3_ was missing in initial T1. But added in second T1.
+
+---
+
+#### 4. Lost Update
+Two transactions read the same data and then update it, with the second update overwriting the first.
+
+```sql
+-- Transaction 1
+BEGIN TRANSACTION;
+SELECT Balance FROM Accounts WHERE AccountID = 1; -- Reads 1000
+
+-- Transaction 2
+BEGIN TRANSACTION;
+SELECT Balance FROM Accounts WHERE AccountID = 1; -- Reads 1000
+
+-- Both transactions update
+UPDATE Accounts SET Balance = 900 WHERE AccountID = 1; -- T1
+UPDATE Accounts SET Balance = 950 WHERE AccountID = 1; -- T2
+
+COMMIT TRANSACTION; -- T1
+COMMIT TRANSACTION; -- T2 (T1's update is lost)
+```
+
+| Step                | T1 Update | T2 Update | Final Balance |
+|---------------------|-----------|-----------|--------------|
+| Initial             |           |           | 1000         |
+| After T1 Update     | 900       |           | 900          |
+| After T2 Update     |           | 950       | 950          |
+| After Both Commits  |           |           | 950          |
+
+**Summary**: _Override_ your transaction by other concurrent transactions.
+
+![Isolation Levels](./resource/IsolationLeveles.png)
+
+![Isolation Levels and Read Phenomena](./resource/IsolationReadPhenomena.png)
+
+![Isolation Levels and Read Phenomena](./resource/implementationOfIsolation.png)
+
 
 ---
 
