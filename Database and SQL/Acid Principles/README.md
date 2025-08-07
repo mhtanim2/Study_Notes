@@ -20,6 +20,8 @@
     - [What](#what-2)
     - [Why](#why-2)
     - [How](#how-2)
+      - [2.2.1. Data Consistency](#221-data-consistency)
+      - [2.2.2. Read Consistency](#222-read-consistency)
   - [2.3. Isolation](#23-isolation)
     - [What](#what-3)
     - [Why](#why-3)
@@ -161,16 +163,16 @@ COMMIT TRANSACTION;
 
 ### How
 There are `2 type` of consistency.
-- #### 2.2.1. Data Consistency
+#### 2.2.1. Data Consistency
   ![Isolation Levels](./resource/ConsistencyInData.png)
-  Consistent Data Example: 
+  > Consistent Data Example: 
   ![Isolation Levels](./resource/ConsistentDataExample.png)
-  Inconsistent Data Example: 
+  >Inconsistent Data Example: 
   ![Isolation Levels](./resource/InConsistentDataExample.png)
 
 
-- #### 2.2.2. Read Consistency
-
+#### 2.2.2. Read Consistency
+![Transaction Diagram](./resource/ConsistencyInRead.png)
 ```sql
 -- Assume a constraint: Balance >= 0
 
@@ -320,7 +322,7 @@ COMMIT TRANSACTION; -- T2 (T1's update is lost)
 - Durability ensures that once a transaction is committed, its changes are permanent, even in the event of a system failure.
 
 ### Why
-- Guarantees that committed data will not be lost, providing reliability.
+- Guarantees that committed data will `not be lost`, providing reliability.
 
 ### How
 
