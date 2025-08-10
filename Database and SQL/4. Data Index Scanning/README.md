@@ -18,8 +18,14 @@ Indexes help speed up data retrieval. Here are two common types:
 ### Simple Index
 A simple index is created on a single column. It helps the database quickly find rows based on that column.
 
+> Structure
 ```sql
-CREATE INDEX grade_index ON students (grade);
+CREATE INDEX concurrently index_name ON table_name (column);
+
+```
+
+```sql
+CREATE INDEX concurrently grade_index ON students (grade);
 ```
 - This index allows fast lookups for queries filtering by `grade`.
 
@@ -27,9 +33,32 @@ CREATE INDEX grade_index ON students (grade);
 A covering index includes additional columns in the index structure, allowing the database to answer some queries using only the index (without accessing the table).
 
 ```sql
-CREATE INDEX grade_index ON students (grade) INCLUDE (student_id);
+CREATE INDEX concurrently grade_index ON students (grade) INCLUDE (student_id);
 ```
 - This index not only speeds up searches by `grade`, but also allows queries that need both `grade` and `student_id` to be satisfied directly from the index, improving performance for those queries.
+
+### Composite Index
+
+A composite index is created on two or more columns. It helps speed up queries that filter or sort by multiple columns together.
+
+```sql
+CREATE INDEX concurrently grade_city_index ON students (grade, city);
+```
+- This index is efficient for queries that filter by both `grade` and `city`, or just by `grade`.
+
+**Important Note:**  
+A composite index on `(grade, city)` can be used for queries filtering by `grade` alone or by both `grade` and `city` together.  
+However, it cannot be used for queries filtering only by `city` (the right column) unless there is a separate index on `city`.
+
+For example:
+- `SELECT * FROM students WHERE grade = 'A';` &rarr; Uses the composite index.
+- `SELECT * FROM students WHERE grade = 'A' AND city = 'Boston';` &rarr; Uses the composite index.
+- `SELECT * FROM students WHERE city = 'Boston';` &rarr; **Will NOT use the composite index** unless there is also an index on `city`.
+
+If you need to efficiently query by `city` alone, create a separate index:
+```sql
+CREATE INDEX city_index ON students (city);
+```
 
 ---
 
