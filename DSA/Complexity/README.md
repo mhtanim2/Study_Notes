@@ -13,17 +13,19 @@ Time complexity describes how the runtime of an algorithm increases with the siz
 - **O(1) – Constant Time:**  
   The algorithm takes the same amount of time regardless of input size.  
   **Example:** Accessing an element in an array by index.
-  ```python
-  arr = [1, 2, 3, 4]
-  print(arr[2])  # O(1)
+  ```csharp
+  int[] arr = { 1, 2, 3, 4 };
+  Console.WriteLine(arr[2]); // O(1)
   ```
 
 - **O(n) – Linear Time:**  
   The runtime increases proportionally with input size.  
   **Example:** Looping through an array.
-  ```python
-  for item in arr:
-      print(item)  # O(n)
+  ```csharp
+  foreach (var item in arr)
+  {
+      Console.WriteLine(item); // O(n)
+  }
   ```
 
 - **O(n^2) – Quadratic Time:**  
@@ -31,10 +33,14 @@ Time complexity describes how the runtime of an algorithm increases with the siz
   > X<sup>n</sup>=m : 2<sup>3</sup>=8
   
   **Example:** Nested loops.
-  ```python
-  for i in arr:
-      for j in arr:
-          print(i, j)  # O(n^2)
+  ```csharp
+  foreach (var i in arr)
+  {
+      foreach (var j in arr)
+      {
+          Console.WriteLine($"{i}, {j}"); // O(n^2)
+      }
+  }
   ```
 
 - **O(log n) – Logarithmic Time:**  
@@ -45,18 +51,22 @@ Time complexity describes how the runtime of an algorithm increases with the siz
   > 2<sup>3</sup>=8 will explain as Log<sub>2</sub>8=3
 
   **Example:** Binary search.
-  ```python
-  def binary_search(arr, target):
-      left, right = 0, len(arr) - 1
-      while left <= right:
-          mid = (left + right) // 2
-          if arr[mid] == target:
-              return mid
-          elif arr[mid] < target:
-              left = mid + 1
-          else:
-              right = mid - 1
-      return -1  # O(log n)
+  ```csharp
+  int BinarySearch(int[] arr, int target)
+  {
+      int left = 0, right = arr.Length - 1;
+      while (left <= right)
+      {
+          int mid = (left + right) / 2;
+          if (arr[mid] == target)
+              return mid;
+          else if (arr[mid] < target)
+              left = mid + 1;
+          else
+              right = mid - 1;
+      }
+      return -1; // O(log n)
+  }
   ```
 
 ---
@@ -71,12 +81,16 @@ Space complexity measures the amount of memory an algorithm uses as the input si
   Memory usage grows linearly with input size.
 
 **Example:**
-```python
-def sum_array(arr):
-    total = 0  # O(1) space
-    for num in arr:
-        total += num
-    return total
+```csharp
+int SumArray(int[] arr)
+{
+    int total = 0; // O(1) space
+    foreach (var num in arr)
+    {
+        total += num;
+    }
+    return total;
+}
 ```
 
 ---
@@ -102,4 +116,4 @@ def sum_array(arr):
 
 ---
 
-Understanding complexity helps you write better, faster, and
+Understanding complexity helps you write better, faster, and more scalable code!
