@@ -27,7 +27,9 @@ Time complexity describes how the runtime of an algorithm increases with the siz
   ```
 
 - **O(n^2) – Quadratic Time:**  
-  The runtime increases with the square of the input size.  
+  The runtime increases with the square of the input size.
+  > X<sup>n</sup>=m : 2<sup>3</sup>=8
+  
   **Example:** Nested loops.
   ```python
   for i in arr:
@@ -36,10 +38,12 @@ Time complexity describes how the runtime of an algorithm increases with the siz
   ```
 
 - **O(log n) – Logarithmic Time:**  
-  The input size `n increases exponentially`, the `time` taken by the algorithm increases `linearly`. 
-  For example, if n doubles, the time taken increases by a constant amount.
-  For power: x<sup>n</sup>=m: 2<sup>3</sup>=8
-  For log, Log<sub>x</sub>m=n: log<sub>2</sub>8=3
+  The runtime `increases logarithmically` as input size increases.
+  That means, `Computation decrease exponentially`
+
+  > X<sup>n</sup>=m will explain as Log<sub>X</sub>m=n
+  > 2<sup>3</sup>=8 will explain as Log<sub>2</sub>8=3
+
   **Example:** Binary search.
   ```python
   def binary_search(arr, target):
