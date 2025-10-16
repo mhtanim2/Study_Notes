@@ -4,10 +4,10 @@ This repository contains organized notes and resources on various computer scien
 
 ## Folder Structure
 
-- **Database and SQL/**
-  - **Acid Principles/**: In-depth notes and diagrams on ACID properties in databases.
-  - **Strong & Eventual Consistency/**: Explanations and examples of consistency models in distributed systems.
-  - **Internal Database/**: Concepts on how databases store data, including tables, pages, indexes, and I/O.
+- **Database and SQL**
+  - **Acid Principles**: In-depth notes and diagrams on ACID properties in databases.
+  - **Strong & Eventual Consistency**: Explanations and examples of consistency models in distributed systems.
+  - **Internal Database**: Concepts on how databases store data, including tables, pages, indexes, and I/O.
   
 Each section contains a `README.md` with detailed explanations and relevant images.
 

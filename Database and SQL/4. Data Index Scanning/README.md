@@ -5,6 +5,10 @@ This document explains common database scanning techniques with examples using a
 ---
 
 ## Example Table: `students`
+```sql
+/* Give the details of the table at database */
+\d students;
+```
 
 | student_id | name     | age | grade | city      |
 |------------|----------|-----|-------|-----------|
@@ -20,16 +24,16 @@ A simple index is created on a single column. It helps the database quickly find
 
 > Structure
 ```sql
+/* Structure: */
 CREATE INDEX concurrently index_name ON table_name (column);
 
-```
-
-```sql
+/* Example: */
 CREATE INDEX concurrently grade_index ON students (grade);
 ```
+
 - This index allows fast lookups for queries filtering by `grade`.
 
-### Covering Index (Index with Included Columns)
+### Non key index (Index with Included Columns)
 A covering index includes additional columns in the index structure, allowing the database to answer some queries using only the index (without accessing the table).
 
 ```sql
@@ -61,21 +65,13 @@ CREATE INDEX city_index ON students (city);
 ```
 
 ---
+# Type of Scanning
+- Index only Scanning
+- Index Scanning
+- Bitmap Index Scan
 
-## 1. Index Scan
 
-- Uses an index to find matching rows efficiently.
-- Good for queries with conditions on indexed columns.
-
-**Example Query:**
-```sql
-SELECT * FROM students WHERE grade = 'A';
-```
-- The database uses the index on `grade` to quickly locate all students with grade 'A'.
-
----
-
-## 2. Index Only Scan
+## 1. Index Only Scan
 
 - Retrieves all required data directly from the index (no need to access the table).
 - Works when all selected columns are present in the index.
@@ -85,6 +81,23 @@ SELECT * FROM students WHERE grade = 'A';
 SELECT grade FROM students WHERE grade = 'A';
 ```
 - Since only the `grade` column is needed and it's indexed, the database can answer the query using only the index.
+
+---
+
+
+## 2. Index Scan
+
+- Uses an index to find matching rows efficiently.
+- Good for queries with conditions on indexed columns.
+- Bitmap index scanning
+- Parallel Sequence Scanning
+- Sequence Scanning
+
+**Example Query:**
+```sql
+SELECT * FROM students WHERE grade = 'A';
+```
+- The database uses the index on `grade` to quickly locate all students with grade 'A'.
 
 ---
 
